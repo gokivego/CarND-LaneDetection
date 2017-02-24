@@ -27,6 +27,8 @@ The goals / steps of this project are the following:
 
 ###1. My pipeline
 
+In order to draw the lines onto lanes I created a find_lanes class. Parameter defaults have been set in the class and if we wish we could pass parameters while creating a class object. This was there is flexibility to pass any values of parameters while creating the class object.
+
 My pipeline consisted of 7 steps:
 
 **Step 1**
@@ -55,23 +57,76 @@ Grayscale Image
 
 The idea in this step is to blur the image to remove the unwanted edges from being detected when passed to the canny edge detection algorithm.
 
+I used a gaussian kernel with kernal size of (5,5) to achieve the result.
 
-In order to draw a single line on the left and right lanes, I modified the draw_lines() function by ...
+Below is the image which is a result of gaussian blurring.
 
-If you'd like to include images to show how the pipeline works, here is how to include an image: 
+Gaussian Blurred Image
+![alt text][image3]
+
+**Step 4**
+
+In this step I passed the image from the previous step to get a canny edge image. The canny edge algorithm uses the gradient difference to identify the edges and then thins the edges.
+
+Below is the image of Canny Edge Detection
+
+Canny Image
+![alt text][image4]
+
+**Step 5**
+
+In this step we mask the unwanted portion of the image. After applying this step on the canny image we shall notice that only the lanes are visible and the rest of the images is masked as it is nothing more than noise in our analysis of lane detection.
+
+Below is the image of only region of interest.
+
+Region of Interest
+![alt text][image5]
+
+**Step 6**
+
+In this step we identify the hough lines which are obtained from the canny image. Once we obtain the hough image we can then superimpose the hough lines onto the original image to get a clearer understanding of what is happening.
+
+Below is the image of hough transform and below that is the image obtained by superimposing the hough transform ont the original image.
+
+Hough Transform
+![alt text][image6]
+
+Hough Transform Superimposed on Original Image
+![alt text][image7]
+
+**Step 7**
+
+This is the most important step in the whole process. We take the output of the hough transform which is a set of lines and do certain operations to find the best lines to fit the lanes.
+
+To do this I have used the numpy.linalg.lstsq function which takes a set of points as input and gives the slope and intercept of the best fit line. 
+
+Firstly, I identified the lines based on slope('+' slope for right lane and '-' for the left lane) and separated them into two right and left. More precise, I used slopes in the range of (0.4,0.8) and (-0.4,-0.8) as with respect to the camera the lanes are always at an angle which is close to the aformentioned ranges.
+
+After identifying these lines, I passed them to the find_line_eq function to obtain the best fit line. With the slope and intercept I could plot the lines and then superimpose them onto the original image to get the final extrapolated lines.
+
+Below is the final image.
+![alt text][image8]
 
 
+###2. Potential shortcomings with the pipeline
 
-###2. Identify potential shortcomings with your current pipeline
+* There is still little bit trouble processing the challenge video. It does run but at a few points the lines jitter and point in arbitrary directions.
+
+* The pipeline is still not robust enough to tackle the changes in road color and shadows that form.
+
+* The pipeline hasn't yet been tested against night driving conditions.
+
+* The pipeline can only produce straight lines which is not the case in reality. It has to be account for the curved roads as well.
+
+* The pipeline scales with the processing power. In my laptop a 27sec video took 29seconds to process which is slower than real time. I would only expect that the processor in the real world car would be faster than mine.
 
 
-One potential shortcoming would be what would happen when ... 
+###3. Possible improvements to the pipeline
 
-Another shortcoming could be ...
+* There is a lit bit of jitter in the lines that are drawn. I plan on smoothing them out by using running averages.
+
+* There is also a case of solving the challenge video. Although it works, there is still scope for ironing out small errors that could be causing the massive deviation in the lines in some instances.
+
+*The processing speed of the pipeline could be improved slightly by reducing the number of operations that are performed on images.
 
 
-###3. Suggest possible improvements to your pipeline
-
-A possible improvement would be to ...
-
-Another potential improvement could be to ...
